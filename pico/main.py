@@ -1,12 +1,12 @@
 """The real-time solar-system display.
 """
 try:
-    from typing import Dict, List, Optional, Tuple, Union
+    from typing import List, Optional, Tuple
 except ImportError:
     pass
 
 # pylint: disable=import-error
-from machine import ADC, I2C, Pin, Timer  # type: ignore
+from machine import I2C, Pin  # type: ignore
 
 # Our modules
 from rtc import RTC, RealTimeClock
