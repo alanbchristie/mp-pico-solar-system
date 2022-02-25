@@ -7,6 +7,7 @@ try:
 except ImportError:
     pass
 
+# pylint: disable=import-error
 from pimoroni_i2c import PimoroniI2C  # type: ignore
 from breakout_rtc import BreakoutRTC  # type: ignore
 from ucollections import namedtuple  # type: ignore

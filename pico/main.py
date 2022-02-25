@@ -5,6 +5,7 @@ try:
 except ImportError:
     pass
 
+# pylint: disable=import-error
 from machine import ADC, I2C, Pin, Timer  # type: ignore
 
 # Our modules
