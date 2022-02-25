@@ -9,7 +9,7 @@ which can be found in his [pico-solar-system] repository. I have
 used his `planets.py` module, but the main-loop and other files are mine.
 
 ### `planets.py` (Mods)
-1. Use of `# pylint: disable=import-error`
+1. Added `#pylint: skip-file` to line 1 
 
 ---
 

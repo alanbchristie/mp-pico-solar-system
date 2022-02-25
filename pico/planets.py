@@ -1,7 +1,4 @@
-# pylint: disable=import-error
-# pylint: disable=line-too-long
-# pylint: disable=missing-module-docstring
-# pylint: disable=unused-variable
+#pylint: skip-file
 
 import math
 import micropython
