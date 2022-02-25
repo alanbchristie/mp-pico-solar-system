@@ -57,6 +57,13 @@ display.init(_BUF)
 # (centre of the 240/240 display).
 _SUN = (_WIDTH // 2, _HEIGHT // 2)
 
+# Short text representation of the month
+# (1-based, i.e. Jan == 1)
+_MONTH = ["---",
+          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
 def plot_orbit(radius):
     """Plots an orbit on the diisplay.
     The pen colour is expected to have been set by the caller.
@@ -88,19 +95,20 @@ def plot_orbit(radius):
             err += dx - (radius << 1)
 
 
-def plot_system(pt: RealTimeClock, day_offset: int):
+def plot_system(pt: RealTimeClock):
     """This function plots the solar system for the given a RealTimeClock value
     and uses a numerical offset of days to add the date when it's not 'today'.
     """
 
-
-    # Get planet positions (now)
+    # Get planet positions (for the given date)
     p_coords = planets.coordinates(pt.year, pt.month, pt.dom, pt.h, pt.m)
 
+    # Clear the display,
+    # ready to plot the new solar system
     display.set_pen(0, 0, 0)
     display.clear()
 
-    # Plot the Sun
+    # Plot the Sun
     display.set_pen(255, 255, 0)
     display.circle(_SUN[0], _SUN[1], 4)
 
@@ -135,11 +143,10 @@ def plot_system(pt: RealTimeClock, day_offset: int):
                                 planets.planets_a[i][0][ar + 4])
                 display.pixel(int(x), int(y))
 
-    # If it's not today, display the date
-    if day_offset:
-        display.set_pen(255, 255, 255)
-        display.text("%02d.%02d.%02d" % (pt.dom, pt.month, pt.year % 100),
-                     0, 0, 0, 2)
+    display.set_pen(255, 255, 255)
+    display.text(f'{pt.dom:02}', 0, 0, 0, 2)
+    display.text(_MONTH[pt.month], 0, 15, 0, 2)
+    display.text(f'{pt.year % 100}', 0, 30, 0, 2)
 
     # Update the display
     display.update()
@@ -149,18 +156,19 @@ _NOW: RealTimeClock = _RTC.datetime()
 
 # Move planets one day at a time for a year.
 #
-# Calculating the planet's positions slows the display refresh
-# so it's not too fast and we don't need to pause between screens.
+# Calculating the planet's positions slows the display refresh
+# so we don't need to pause between screens.
 # Use mktime/gmtime to conveniently calculate new future dates
 # (we don't care about minutes, seconds, day-of-week or day-of-year).
 _PT_SECONDS: int = time.mktime((_NOW.year, _NOW.month, _NOW.dom, _NOW.h, 0, 0, 0, 0))
-for day in range(365):
-    # Caculate today's time (epoch seconds)
+for _ in range(365):
+    # Calculate today's time (epoch seconds)
     _PT_SECONDS += _DAY_SECONDS
     # Get a gmtime (UTC) from epoch seconds
     gm_time: Tuple = time.gmtime(_PT_SECONDS)
     # Convert to our RTC
-    # Dont care about day-of-week, minute or second)
-    rtc: RealTimeClock = RealTimeClock(gm_time[0], gm_time[1], gm_time[2], 0, gm_time[3], 0, 0)
+    # Don't care about day-of-week, minute or second)
+    rtc: RealTimeClock = RealTimeClock(gm_time[0], gm_time[1], gm_time[2],
+                                       0, gm_time[3], 0, 0)
     # Display the solar system
-    plot_system(rtc, day)
+    plot_system(rtc)
