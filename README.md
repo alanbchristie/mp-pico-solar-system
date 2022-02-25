@@ -1,4 +1,11 @@
 # mp-pico-solar-system
+
+[![lint](https://github.com/alanbchristie/mp-pico-solar-system/actions/workflows/lint.yaml/badge.svg)](https://github.com/alanbchristie/mp-pico-solar-system/actions/workflows/lint.yaml)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/alanbchristie/mp-pico-solar-system)
+![GitHub](https://img.shields.io/github/license/alanbchristie/mp-pico-solar-system)
+
+![Platform](https://img.shields.io/badge/platform-micropython-lightgrey)
+
 An app designed for the Pico Explorer Base board and the RV3028 Real-Time Clock
 breakout that displays solar system's planets on the board's display
 in real-time.
