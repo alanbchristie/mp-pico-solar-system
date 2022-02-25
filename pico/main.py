@@ -10,7 +10,7 @@ from machine import I2C, Pin  # type: ignore
 
 # Our modules
 from rtc import RTC, RealTimeClock
-from planets import coordinates
+from planets import coordinates  # type: ignore
 
 # Configured I2C controller and its GPIO pins.
 # The Pico Explorer uss GPIO 20/21 for SDA/SCL (I2C 0)
