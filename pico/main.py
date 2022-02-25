@@ -160,7 +160,8 @@ _NOW: RealTimeClock = _RTC.datetime()
 # so we don't need to pause between screens.
 # Use mktime/gmtime to conveniently calculate new future dates
 # (we don't care about minutes, seconds, day-of-week or day-of-year).
-_PT_SECONDS: int = time.mktime((_NOW.year, _NOW.month, _NOW.dom, _NOW.h, 0, 0, 0, 0))
+_PT_SECONDS: float = time.mktime((_NOW.year, _NOW.month, _NOW.dom, _NOW.h,
+                                  0, 0, 0, 0, 0))
 for _ in range(365):
     # Calculate today's time (epoch seconds)
     _PT_SECONDS += _DAY_SECONDS
