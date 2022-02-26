@@ -95,11 +95,13 @@ def button_pressed() -> bool:
     if display.is_pressed(display.BUTTON_X):
         _RUN = False
         return True
-    elif display.is_pressed(display.BUTTON_Y)\
+
+    if display.is_pressed(display.BUTTON_Y)\
             and _ADVANCE_DAYS < _ADVANCE_DAYS_MAX:
         _ADVANCE_DAYS += 1
         return True
-    elif display.is_pressed(display.BUTTON_B)\
+
+    if display.is_pressed(display.BUTTON_B)\
             and _ADVANCE_DAYS > 0:
         _ADVANCE_DAYS -= 1
         return True
@@ -258,7 +260,7 @@ def run() -> None:
     display.set_pen(0, 0, 0)
     display.clear()
     display.update()
-    
+
 
 # MAIN ------------------------------------------------------------------------
 
