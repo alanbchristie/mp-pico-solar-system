@@ -17,7 +17,7 @@ The orbit tracks for the four rocky inner planets are brighter,
 and the orbit tracks for the outer planets are darker. **Earth** is placed on
 a green orbit with (obviously) **Mars** on the nearest outer track and
 **Venus** on the nearest inner track. The date of the planetary positions
-is shown in the top-right hand corner of the display: -
+is shown in the top left-hand corner of the display: -
 
 ![display](solar-system.001.png)
 
