@@ -10,6 +10,12 @@ An app designed for the Pico Explorer Base board and the RV3028 Real-Time Clock
 breakout that displays solar system's planets on the board's display
 in real-time.
 
+Using the app: -
+- At startup the current locations of the planets are displayed
+- Press (and hold) **Y** to advance the planets
+- Press (and hold) **B** to retard the planets
+- Press **X** to exit the application's main loop
+
 ## Credits
 Planetary calculations have been taken from the code written by [Dmytro Panin]
 which can be found in his [pico-solar-system] repository. I have
