@@ -12,9 +12,19 @@ planets on the board's display.
 
 ![explorer](explorer.jpg)
 
-Using the app: -
-- At startup the current locations of the planets are displayed
-- Press (and hold) **Y** to advance the planets
+The planets are displayed (not to scale!) on simplified circular orbits.
+The orbit tracks for the four rocky inner planets are brighter,
+and the orbit tracks for the outer planets are darker. **Earth** is placed on
+a green orbit with (obviously) **Mars** on the nearest outer track and
+**Venus** on the nearest inner track. The date of the planetary positions
+is shown in the top-right hand corner of the display: -
+
+![display](solar-system.001.png)
+
+## Using the app
+At startup the current locations of the planets are displayed
+
+- Press (and hold) **Y** to advance the planets, one day at a time
 - Press (and hold) **B** to retard the planets
 - Press **X** to exit the application's main loop
 
