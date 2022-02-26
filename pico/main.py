@@ -1,6 +1,4 @@
 """The real-time solar-system display.
-
-https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/examples/pico_explorer
 """
 import math
 import time
