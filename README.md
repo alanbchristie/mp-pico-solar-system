@@ -6,8 +6,9 @@
 
 ![Platform](https://img.shields.io/badge/platform-micropython-lightgrey)
 
-An app designed for the Pico Explorer Base board and the RV3028 Real-Time Clock
-breakout. The app displays the solar system's planets on the board's display.
+An app designed for the **Pico Explorer Base** board and the
+**RV3028** Real-Time Clock breakout. The app displays the solar system's
+planets on the board's display.
 
 ![explorer](explorer.jpg)
 
