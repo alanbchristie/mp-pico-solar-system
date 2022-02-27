@@ -53,14 +53,14 @@ The `planets.py` module is unchanged from Dmytro's original. Unfortunately
 it has no documentation, and I've reverse-engineered some potentially
 helpful documentation here...
 
-- `planets_a` is a list of planet 'bitmaps' (spriies). The array has
+- `planets_a` is a list of planet 'bitmaps' (sprites). The array has
   eight entries, one for each planet (Mercury to Neptune). Each array
-  entry is a one-dimensional list of numbers but is 'interpreted' as
+  entry is a one-dimensional list of bytes that is 'interpreted' as
   consecutive blocks (rows) of 5-byte values for each pixel in the bitmap.
-  The five bytes are the pixel's 'x', 'y', 'red', 'green', and 'blue' value.
-  The bitmap size is 7x7 with 'x' and 'y' values ranging from 47 to 50.
+  The five bytes are the pixel's 'x', 'y', 'red', 'green', and 'blue' values.
+  The bitmap size is up to 7x7 with 'x' and 'y' values ranging from 47 to 50.
   The pixel at 50,50 (the centre of the bitmap) is placed on planet's
-  _coordinate_.
+  _co-ordinate_.
 
 ---
 
