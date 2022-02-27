@@ -1,4 +1,4 @@
-"""A simplified real-time clock.
+"""A simplified micropython-style real-time clock.
 A wrapper around the RV3028 I2C module.
 """
 import time
@@ -19,6 +19,21 @@ RealTimeClock: namedtuple =\
                ('year', 'month', 'dom', 'dow', 'h', 'm', 's'))
 
 
+# Short text representation of the month
+# (1-based, i.e. Jan == 1)
+_MONTH_NAME = ["---",
+               "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def month_name(month: int) -> str:
+    """Returns the short name of the Month.
+    """
+    assert 0 < month <= 12
+
+    return _MONTH_NAME[month]
+
+
 class RTC:
     """A wrapper around the Pimoroni BreakoutRTC class,
     a driver for the RV3028 RTC I2C breakout module.
@@ -30,8 +45,8 @@ class RTC:
         # Create an object from the expected (built-in) Pimoroni library
         # that gives us access to the RV3028 RTC. We use this
         # to set the value after editing.
-        pimoroni_i2c: PimoroniI2C = PimoroniI2C(sda=sda, scl=scl)
-        self._rtc: BreakoutRTC = BreakoutRTC(pimoroni_i2c)
+        self._pimoroni_i2c: PimoroniI2C = PimoroniI2C(sda=sda, scl=scl)
+        self._rtc: BreakoutRTC = BreakoutRTC(self._pimoroni_i2c)
         # Setting backup switchover mode to '3'
         # means the device will switch to battery
         # when the power supply drops out.
