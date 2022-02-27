@@ -1,4 +1,7 @@
 """The real-time solar-system display.
+
+Based on code written by Dmytro Panin and enhanced
+for use on the Pimoroni Explorer Base board.
 """
 import math
 import time
@@ -13,7 +16,7 @@ from machine import I2C, Pin  # type: ignore
 import picoexplorer as display  # type: ignore
 
 # Application modules
-from rtc import RTC, RealTimeClock
+from rtc import RTC, RealTimeClock, month_name
 import planets
 
 # Uncomment when debugging callback problems
@@ -53,20 +56,14 @@ _ORBIT_SCALE_FACTOR: int = 14
 
 # Initialise the Pico Explorer display,
 # with a buffer using 2-bytes per pixel (240x240)
-_WIDTH: int = display.get_width()
-_HEIGHT: int = display.get_height()
-_BUF: bytearray = bytearray(_WIDTH * _HEIGHT * 2)
-display.init(_BUF)
+_DISPLAY_WIDTH: int = display.get_width()
+_DISPLAY_HEIGHT: int = display.get_height()
+_DISPLAY_BUF: bytearray = bytearray(_DISPLAY_WIDTH * _DISPLAY_HEIGHT * 2)
+display.init(_DISPLAY_BUF)
 
 # Fixed display coordinates of the Sun,
 # (centre of the 240/240 display).
-_SUN = (_WIDTH // 2, _HEIGHT // 2)
-
-# Short text representation of the month
-# (1-based, i.e. Jan == 1)
-_MONTH = ["---",
-          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+_SUN = (_DISPLAY_WIDTH // 2, _DISPLAY_HEIGHT // 2)
 
 # Run the application?
 # Normally True, set to False when the user
@@ -76,8 +73,29 @@ _RUN: bool = True
 # The number of days to advance the planets (from today).
 # 0..n
 _ADVANCE_DAYS: int = 0
-# Maximum Days we're allowed to advance. 4 Years?
-_ADVANCE_DAYS_MAX: int = 1461
+# Maximum Days we're allowed to advance.
+# No point in going more than a year, when earth's back to where we started.
+# We're interested in the planet locations with respect to Earth,
+# not interested in seeing all the planets orbit the Sun!
+# After all, it takes Neptune 165 years (60,000 days) to complete its orbit!
+_ADVANCE_DAYS_MAX: int = 366
+# The number of consecutive date advance/retard operation.
+# This is incremented in the 'button_press()' function
+# and cleared when the button's been released (from the run() method).
+# Speed is increased, based on this value.
+_CONSECUTIVE_CHANGE: int = 0
+# Speed threshold.
+# The number of consecutive advance/retard operations that result
+# in the speed doubling. Used in 'get_speed()'.
+_SPEED_THRESHOLD: int = 7
+
+
+def get_speed() -> int:
+    """Returns the advance/retard speed.
+    This is based on the number of consecutive changes,
+    and doubles every time the speed threshold is met.
+    """
+    return 2 ** (_CONSECUTIVE_CHANGE // _SPEED_THRESHOLD)
 
 
 def button_pressed() -> bool:
@@ -88,6 +106,7 @@ def button_pressed() -> bool:
     We return True if something's changed.
     """
     global _ADVANCE_DAYS
+    global _CONSECUTIVE_CHANGE
     global _RUN
 
     if display.is_pressed(display.BUTTON_X):
@@ -96,12 +115,23 @@ def button_pressed() -> bool:
 
     if display.is_pressed(display.BUTTON_Y)\
             and _ADVANCE_DAYS < _ADVANCE_DAYS_MAX:
-        _ADVANCE_DAYS += 1
+
+        # We set the 'speed' based on the number of consecutive changes,
+        #
+        _ADVANCE_DAYS += get_speed()
+        if _ADVANCE_DAYS < _ADVANCE_DAYS_MAX:
+            _CONSECUTIVE_CHANGE += 1
+        else:
+            _ADVANCE_DAYS = _ADVANCE_DAYS_MAX
         return True
 
     if display.is_pressed(display.BUTTON_B)\
             and _ADVANCE_DAYS > 0:
-        _ADVANCE_DAYS -= 1
+        _ADVANCE_DAYS -= get_speed()
+        if _ADVANCE_DAYS > 0:
+            _CONSECUTIVE_CHANGE += 1
+        else:
+            _ADVANCE_DAYS = 0
         return True
 
     # No change if we get here
@@ -112,6 +142,9 @@ def plot_orbit(radius: int) -> None:
     """Plots an orbit on the display.
     The pen colour is expected to have been set by the caller.
     """
+    assert radius
+    assert radius > 0
+
     # Centre of the orbit...
     cx: int = _SUN[0]
     cy: int = _SUN[1]
@@ -139,10 +172,43 @@ def plot_orbit(radius: int) -> None:
             err += dx - (radius << 1)
 
 
-def plot_system(pt: RealTimeClock):
+def plot_date(pt: RealTimeClock) -> None:
+    """Plots the solar system date.
+    """
+    assert pt
+    assert _ADVANCE_DAYS >= 0
+
+    # The explorer text() method takes 5 arguments: -
+    # - String
+    # - x position
+    # - y position
+    # - width
+    # - size
+
+    # Plot the date in the top-left corner...
+    # By using a width of '0' we force the date onto new lines
+    # for the months and the years.
+    display.set_pen(200, 200, 200)
+    month_str: str = month_name(pt.month)
+    display.text(f'{pt.dom:02} {month_str} {pt.year % 100}', 0, 0, 0, 2)
+
+    # Plot 'now' if there's no advancement
+    # or the number of days the display has been advanced.
+    display.set_pen(128, 128, 128)
+    if _ADVANCE_DAYS == 0:
+        display.text('Now', 0, 226, 0, 2)
+    else:
+        # To avoid wrapping at the space between the number and 'days'
+        # we need to use a width that accommodates the max offset.
+        # To be safe, regardless of the offset, use the whole display width.
+        display.text(f'+{_ADVANCE_DAYS} days', 0, 226, _DISPLAY_WIDTH, 2)
+
+
+def plot_system(pt: RealTimeClock) -> None:
     """This function plots the solar system for the given a RealTimeClock value
     and uses a numerical offset of days to add the date when it's not 'today'.
     """
+    assert pt
 
     # Get planet positions (for the given date)
     p_coords = planets.coordinates(pt.year, pt.month, pt.dom, pt.h, pt.m)
@@ -155,6 +221,11 @@ def plot_system(pt: RealTimeClock):
     # Plot the Sun
     display.set_pen(255, 255, 0)
     display.circle(_SUN[0], _SUN[1], 4)
+
+    # Plot any text first,
+    # we overlay the plants on top of this so the
+    # solar system is always on top.
+    plot_date(pt)
 
     # For each planet...
     # 'orbit' runs from 0..7
@@ -181,7 +252,7 @@ def plot_system(pt: RealTimeClock):
         coordinates = (orbit_radius * math.sin(feta),
                        orbit_radius * math.cos(feta))
         coordinates = (coordinates[0] + _SUN[0],
-                       _HEIGHT - (coordinates[1] + _SUN[1]))
+                       _DISPLAY_HEIGHT - (coordinates[1] + _SUN[1]))
         for ar in range(0, len(planets.planets_a[orbit][0]), 5):
             x = planets.planets_a[orbit][0][ar] - 50 + coordinates[0]
             y = planets.planets_a[orbit][0][ar + 1] - 50 + coordinates[1]
@@ -191,27 +262,25 @@ def plot_system(pt: RealTimeClock):
                                 planets.planets_a[orbit][0][ar + 4])
                 display.pixel(int(x), int(y))
 
-    # Plot the date in the top-left corner...
-    display.set_pen(255, 255, 255)
-    display.text(f'{pt.dom:02}', 0, 0, 0, 2)
-    display.text(_MONTH[pt.month], 0, 15, 0, 2)
-    display.text(f'{pt.year % 100}', 0, 30, 0, 2)
-
     # Refresh the display
     display.update()
 
 
 def run() -> None:
     """The main look, we remain here until the user
-    hits the exit button."""
+    hits the exit button.
+    """
+    global _CONSECUTIVE_CHANGE
 
     print('Running... (press and hold X to quit')
 
-    # When do we update the current clock?
-    # When idle we go around the loop about 1 every second,
-    # so we set this to _TIME_REFRESH_SECONDS but start with 0
-    # to force the collection of the current time.
+    # We update the current clock value but as the planets
+    # move so slowly there's no point in continuously calling the RTC.
+    # When idle we go around the loop about twice every second,
+    # so we set this value to an hour, say, but start with 0
+    # to force the collection of the current time on the first pass.
     update_countdown: int = 0
+
     while _RUN:
 
         # Update the current time?
@@ -227,8 +296,9 @@ def run() -> None:
                                               0, 0, 0, 0, 0))
             print(f'Got {now}')
             rtc_changed = True
-            # Reset the update timer
-            update_countdown = _TIME_REFRESH_SECONDS
+            # Reset the update countdown.
+            # Idle time is 500mS, hence '2 x'
+            update_countdown = 2 * _TIME_REFRESH_SECONDS
         else:
             update_countdown -= 1
 
@@ -248,9 +318,11 @@ def run() -> None:
 
         else:
 
-            # Nothing changed,
+            # Nothing changed, reset 'consecutive change'
+            # (used for speed adjustments in the button-press)
+            _CONSECUTIVE_CHANGE = 0
             # don't stress the CPU - sleep for a while.
-            time.sleep(1)
+            time.sleep_ms(500)  # type: ignore
 
     print('Done, bye')
 
