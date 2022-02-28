@@ -70,6 +70,17 @@ _SUN = (_DISPLAY_WIDTH // 2, _DISPLAY_HEIGHT // 2)
 # hits the "X" button.
 _RUN: bool = True
 
+# Demo mode?
+# If set the planets rotate automatically
+# and the advance/retard buttons are ignored.
+_DEMO: bool = True
+# The demo advance limit (after which the animation begins again).
+# It's the time it takes Neptune (the furthest plant) to complete its orbit.
+# 160 years x 365 days + 40 (leap year days), i.e. 58,440 days.
+_DEMO_ADVANCE_LIMIT: int = 58_440
+# Demo orbit speed
+_DEMO_SPEED: int = 2
+
 # The number of days to advance the planets (from today).
 # 0..n
 _ADVANCE_DAYS: int = 0
@@ -77,7 +88,7 @@ _ADVANCE_DAYS: int = 0
 # No point in going more than a year, when earth's back to where we started.
 # We're interested in the planet locations with respect to Earth,
 # not interested in seeing all the planets orbit the Sun!
-# After all, it takes Neptune 165 years (60,000 days) to complete its orbit!
+# After all, it takes Neptune 165 years to complete its orbit!
 _ADVANCE_DAYS_MAX: int = 366
 # The number of consecutive date advance/retard operation.
 # This is incremented in the 'button_press()' function
@@ -113,7 +124,9 @@ def button_pressed() -> bool:
         _RUN = False
         return True
 
-    if display.is_pressed(display.BUTTON_Y)\
+    # If advancing, and not gone too far
+    # then advance. In DEMO mode the advance/retard buttons are ignored.
+    if not _DEMO and display.is_pressed(display.BUTTON_Y)\
             and _ADVANCE_DAYS < _ADVANCE_DAYS_MAX:
 
         # We set the 'speed' based on the number of consecutive changes,
@@ -125,7 +138,9 @@ def button_pressed() -> bool:
             _ADVANCE_DAYS = _ADVANCE_DAYS_MAX
         return True
 
-    if display.is_pressed(display.BUTTON_B)\
+    # If retarding, and not back to 'now'
+    # then retard. In DEMO mode the advance/retard buttons are ignored.
+    if not _DEMO and display.is_pressed(display.BUTTON_B)\
             and _ADVANCE_DAYS > 0:
         _ADVANCE_DAYS -= get_speed()
         if _ADVANCE_DAYS > 0:
@@ -133,6 +148,13 @@ def button_pressed() -> bool:
         else:
             _ADVANCE_DAYS = 0
         return True
+
+    if _DEMO:
+        # Advance the planets in demo mode.
+        # Resetting when we reach the advance limit.
+        _ADVANCE_DAYS += _DEMO_SPEED
+        if _ADVANCE_DAYS > _DEMO_ADVANCE_LIMIT:
+            _ADVANCE_DAYS = 0
 
     # No change if we get here
     return False
@@ -186,11 +208,11 @@ def plot_date(pt: RealTimeClock) -> None:
     # - size
 
     # Plot the date in the top-left corner...
-    # By using a width of '0' we force the date onto new lines
-    # for the months and the years.
+    # By using a width of '0' we force the date text onto new lines
+    # at each space int it. i.e. months and years on.
     display.set_pen(200, 200, 200)
     month_str: str = month_name(pt.month)
-    display.text(f'{pt.dom:02} {month_str} {pt.year % 100}', 0, 0, 0, 2)
+    display.text(f'{pt.dom:02} {month_str} {pt.year}', 0, 0, 0, 2)
 
     # Plot 'now' if there's no advancement
     # or the number of days the display has been advanced.
@@ -302,7 +324,7 @@ def run() -> None:
         else:
             update_countdown -= 1
 
-        if (button_pressed() or rtc_changed) and _RUN:
+        if (button_pressed() or rtc_changed or _DEMO) and _RUN:
 
             # Add any daily offset to the current time (epoch seconds)
             plot_seconds = now_seconds + _ADVANCE_DAYS * _DAY_SECONDS

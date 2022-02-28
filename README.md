@@ -21,6 +21,12 @@ is shown in the top left-hand corner of the display: -
 
 ![display](solar-system.001.png)
 
+## Installation
+Copy the files in the `pico` directory to the root of the Raspberry Pi Pico.
+`main.py` will run automatically when the explorer is switched on.
+Alternatively, if you don;t want to commit `main.py` to the board you
+can upload the other files and use [Thonny] to run the app.
+
 ## Using the app
 At startup the current locations of the planets are displayed
 
@@ -31,11 +37,11 @@ At startup the current locations of the planets are displayed
 As you hold **X** or **B** the speed that the planets advance or retard
 increases, i.e. they orbit faster the longer you press the buttons.
 
-## Installation
-Copy the files in the `pico` directory to the root of the Raspberry Pi Pico.
-`main.py` will run automatically when the explorer is switched on.
-Alternatively, if you don;t want to commit `main.py` to the board you
-can upload the other files and use [Thonny] to run the app.
+## Demo mode
+If you set `_DEMO` to `True` an automatic annotation of the orbits takes place
+(and the advance/retard buttons are disabled). The animation resets after a
+full orbit of Neptune (160 years) with a full orbit taking about 5 minutes
+on the Pico.
 
 ## Credits
 Planetary calculations have been taken from the code written by [Dmytro Panin]
