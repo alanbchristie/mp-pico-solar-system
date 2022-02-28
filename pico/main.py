@@ -73,13 +73,17 @@ _RUN: bool = True
 # Demo mode?
 # If set the planets rotate automatically
 # and the advance/retard buttons are ignored.
-_DEMO: bool = True
+_DEMO: bool = False
 # The demo advance limit (after which the animation begins again).
-# It's the time it takes Neptune (the furthest plant) to complete its orbit.
-# 160 years x 365 days + 40 (leap year days), i.e. 58,440 days.
-_DEMO_ADVANCE_LIMIT: int = 58_440
+# Because we might be on a 32-bit platform, we're subject to the famous unix
+# 'end-of-world' date when we advance, i.e. '2,147,483,647' seconds.
+# It's the largest epoch seconds we can use without encountering an error
+# (19th Jan 2038). It's 2022 now, so let's limit the DEMO advance to 10 years.
+# The demo will most likely crash if used after 2028 and the while app will
+# stop working altogether on a 32-but system in 16 years.
+_DEMO_ADVANCE_LIMIT: int = 3_650
 # Demo orbit speed
-_DEMO_SPEED: int = 2
+_DEMO_SPEED: int = 4
 
 # The number of days to advance the planets (from today).
 # 0..n
@@ -214,16 +218,17 @@ def plot_date(pt: RealTimeClock) -> None:
     month_str: str = month_name(pt.month)
     display.text(f'{pt.dom:02} {month_str} {pt.year}', 0, 0, 0, 2)
 
-    # Plot 'now' if there's no advancement
-    # or the number of days the display has been advanced.
-    display.set_pen(128, 128, 128)
-    if _ADVANCE_DAYS == 0:
-        display.text('Now', 0, 226, 0, 2)
-    else:
-        # To avoid wrapping at the space between the number and 'days'
-        # we need to use a width that accommodates the max offset.
-        # To be safe, regardless of the offset, use the whole display width.
-        display.text(f'+{_ADVANCE_DAYS} days', 0, 226, _DISPLAY_WIDTH, 2)
+    if not _DEMO:
+        # Plot 'now' if there's no advancement
+        # or the number of days the display has been advanced.
+        display.set_pen(128, 128, 128)
+        if _ADVANCE_DAYS == 0:
+            display.text('Now', 0, 226, 0, 2)
+        else:
+            # To avoid wrapping at the space between the number and 'days'
+            # we need to use a width that accommodates the max offset.
+            # To be safe, regardless of the offset, use the whole display width.
+            display.text(f'+{_ADVANCE_DAYS} days', 0, 226, _DISPLAY_WIDTH, 2)
 
 
 def plot_system(pt: RealTimeClock) -> None:
