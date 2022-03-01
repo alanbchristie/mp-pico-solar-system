@@ -70,6 +70,8 @@ helpful documentation here...
 
 ---
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/alanbchristie)
+
 [dmytro panin]: https://github.com/dr-mod
 [pico explorer base]: https://shop.pimoroni.com/products/pico-explorer-base
 [pico-solar-system]: https://github.com/dr-mod/pico-solar-system
