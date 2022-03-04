@@ -53,6 +53,7 @@ _TIME_REFRESH_SECONDS: int = 3_600
 # Adjust to fit the screen,
 # 14 is good for the Pico Explorer Base
 _ORBIT_SCALE_FACTOR: int = 14
+_EARTH_ORBIT: int = 2
 
 # Initialise the Pico Explorer display,
 # with a buffer using 2-bytes per pixel (240x240)
@@ -85,6 +86,10 @@ _DEMO_ADVANCE_LIMIT: int = 3_650
 # Demo orbit speed
 _DEMO_SPEED: int = 4
 
+# Night mode? Everything in RED (default).
+# Toggled with button "A"
+_NIGHT_MODE: bool = True
+
 # The number of days to advance the planets (from today).
 # 0..n
 _ADVANCE_DAYS: int = 0
@@ -105,6 +110,16 @@ _CONSECUTIVE_CHANGE: int = 0
 _SPEED_THRESHOLD: int = 7
 
 
+def set_pen(red: int, green: int, blue: int) -> None:
+    """Sets the pen colour.
+    If 'night mode' only RED is passed through.
+    """
+    if _NIGHT_MODE:
+        display.set_pen(red, 0, 0)
+    else:
+        display.set_pen(red, green, blue)
+
+
 def get_speed() -> int:
     """Returns the advance/retard speed.
     This is based on the number of consecutive changes,
@@ -115,17 +130,30 @@ def get_speed() -> int:
 
 def button_pressed() -> bool:
     """Checks the buttons, acting on any supported combinations
-    that are pressed. Y advances the planets, B retards them and
-    is an exit command.
+    that are pressed.
+    "Y" advances the planets.
+    "B" retards the planets.
+    "A" toggles night mode.
+    "X" quits the app (returning to the shell)
 
     We return True if something's changed.
     """
     global _ADVANCE_DAYS
     global _CONSECUTIVE_CHANGE
+    global _NIGHT_MODE
     global _RUN
 
     if display.is_pressed(display.BUTTON_X):
         _RUN = False
+        return True
+
+    if display.is_pressed(display.BUTTON_A):
+        # Toggle night mode.
+        _NIGHT_MODE = False if _NIGHT_MODE else True
+        # And then wait for button to be released
+        # to avoid rapid toggling.
+        while display.is_pressed(display.BUTTON_A):
+            time.sleep_ms(100)  # type: ignore
         return True
 
     # If advancing, and not gone too far
@@ -214,14 +242,14 @@ def plot_date(pt: RealTimeClock) -> None:
     # Plot the date in the top-left corner...
     # By using a width of '0' we force the date text onto new lines
     # at each space int it. i.e. months and years on.
-    display.set_pen(200, 200, 200)
+    set_pen(200, 200, 200)
     month_str: str = month_name(pt.month)
     display.text(f'{pt.dom:02} {month_str} {pt.year}', 0, 0, 0, 2)
 
     if not _DEMO:
         # Plot 'now' if there's no advancement
         # or the number of days the display has been advanced.
-        display.set_pen(128, 128, 128)
+        set_pen(128, 128, 128)
         if _ADVANCE_DAYS == 0:
             display.text('Now', 0, 226, 0, 2)
         else:
@@ -242,11 +270,11 @@ def plot_system(pt: RealTimeClock) -> None:
 
     # Clear the display,
     # ready to plot the new solar system
-    display.set_pen(0, 0, 0)
+    set_pen(0, 0, 0)
     display.clear()
 
     # Plot the Sun
-    display.set_pen(255, 255, 0)
+    set_pen(230, 230, 0)
     display.circle(_SUN[0], _SUN[1], 4)
 
     # Plot any text first,
@@ -261,17 +289,20 @@ def plot_system(pt: RealTimeClock) -> None:
         # Plot its underlying (simplified) orbit
         # as a grey circle around the Sun.
         orbit_radius: int = _ORBIT_SCALE_FACTOR * (orbit + 1) + 2
-        if orbit == 2:
+        if orbit == _EARTH_ORBIT:
             # Us...
-            # (bright green orbit)
-            display.set_pen(0, 150, 0)
+            # (bright red or green orbit)
+            if _NIGHT_MODE:
+                set_pen(180, 0, 0)
+            else:
+                set_pen(0, 150, 0)
         elif orbit < 4:
             # Rock planets...
             # (brighter orbits)
-            display.set_pen(110, 110, 110)
+            set_pen(110, 110, 110)
         else:
             # Gas giants...
-            display.set_pen(10, 10, 10)
+            set_pen(10, 10, 10)
         plot_orbit(orbit_radius)
 
         # Now plot the planet
@@ -284,9 +315,15 @@ def plot_system(pt: RealTimeClock) -> None:
             x = planets.planets_a[orbit][0][ar] - 50 + coordinates[0]
             y = planets.planets_a[orbit][0][ar + 1] - 50 + coordinates[1]
             if x >= 0 and y >= 0:
-                display.set_pen(planets.planets_a[orbit][0][ar + 2],
-                                planets.planets_a[orbit][0][ar + 3],
-                                planets.planets_a[orbit][0][ar + 4])
+                if _NIGHT_MODE:
+                    if orbit == _EARTH_ORBIT:
+                        display.set_pen(200, 0, 0)
+                    else:
+                        display.set_pen(150, 0, 0)
+                else:
+                    display.set_pen(planets.planets_a[orbit][0][ar + 2],
+                                    planets.planets_a[orbit][0][ar + 3],
+                                    planets.planets_a[orbit][0][ar + 4])
                 display.pixel(int(x), int(y))
 
     # Refresh the display

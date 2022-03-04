@@ -19,6 +19,9 @@ a green orbit with (obviously) **Mars** on the nearest outer track and
 **Venus** on the nearest inner track. The date of the planetary positions
 is shown in the top left-hand corner of the display: -
 
+At startup the display is in _Night Mode_, with everything rendered in RED.
+Hitting "A" toggles between this mode and colour.
+
 ![display](solar-system.001.png)
 
 ## Installation
@@ -32,6 +35,7 @@ At startup the current locations of the planets are displayed
 
 - Press (and hold) **Y** to advance the planets, one day at a time
 - Press (and hold) **B** to retard the planets
+- Press **A** to toggle night mode
 - Press **X** to exit the application's main loop
 
 As you hold **X** or **B** the speed that the planets advance or retard
