@@ -149,7 +149,7 @@ def button_pressed() -> bool:
 
     if display.is_pressed(display.BUTTON_A):
         # Toggle night mode.
-        _NIGHT_MODE = False if _NIGHT_MODE else True
+        _NIGHT_MODE = not _NIGHT_MODE
         # And then wait for button to be released
         # to avoid rapid toggling.
         while display.is_pressed(display.BUTTON_A):
