@@ -27,7 +27,7 @@ Hitting "A" toggles between this mode and colour.
 ## Installation
 Copy the files in the `pico` directory to the root of the Raspberry Pi Pico.
 `main.py` will run automatically when the explorer is switched on.
-Alternatively, if you don;t want to commit `main.py` to the board you
+Alternatively, if you don't want to commit `main.py` to the board you
 can upload the other files and use [Thonny] to run the app.
 
 ## Using the app
