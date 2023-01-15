@@ -6,9 +6,9 @@
 
 ![Platform](https://img.shields.io/badge/platform-micropython-lightgrey)
 
-An app designed for the **Pico Explorer Base** board and the
+An app designed for the [Pico Explorer Base] board and the
 **RV3028** Real-Time Clock breakout. The app displays the solar system's
-planets on the board's display.
+planets on the board's built-in display.
 
 ![explorer](explorer.jpg)
 
@@ -17,10 +17,10 @@ The orbit tracks for the four rocky inner planets are brighter,
 and the orbit tracks for the outer planets are darker. **Earth** is placed on
 a green orbit with (obviously) **Mars** on the nearest outer track and
 **Venus** on the nearest inner track. The date of the planetary positions
-is shown in the top left-hand corner of the display: -
+is shown in the top left-hand corner of the display.
 
 At startup the display is in _Night Mode_, with everything rendered in RED.
-Hitting "A" toggles between this mode and colour.
+Hitting "A" toggles between this mode and the alternative full colour mode.
 
 ![display](solar-system.001.png)
 
@@ -38,18 +38,23 @@ At startup the current locations of the planets are displayed
 - Press **A** to toggle night mode
 - Press **X** to exit the application's main loop
 
-As you hold **X** or **B** the speed that the planets advance or retard
-increases, i.e. they orbit faster the longer you press the buttons.
+Maximum Advance is set by the program's `_ADVANCE_DAYS_MAX` constant (typically
+a year). Maximum retard set by the program's `_ADVANCE_DAYS_MIN` constant (typically
+a year). So you can display the planets either side of the current time by a year (i.e.
+one orbit of the Sun by the Earth).
+
+As you hold **Y** or **B** the speed that the planets advance or retard
+increases, i.e. they orbit faster the longer the button remains pressed.
 
 ## Demo mode
-If you set `_DEMO` to `True` an automatic annotation of the orbits takes place
+If you set `_DEMO` to `True` an automatic advancement of the orbits takes place
 (and the advance/retard buttons are disabled). The animation resets after a
 full orbit of Neptune (160 years) with a full orbit taking about 5 minutes
 on the Pico.
 
 ## Credits
-Planetary calculations have been taken from the code written by [Dmytro Panin]
-which can be found in his [pico-solar-system] repository. I have
+Planetary calculations have been taken from the code written by [Dmytro Panin],
+and can be found in his [pico-solar-system] repository. I have
 used his `planets.py` module, but replaced the main-loop with a version
 suitable for the Pico Explorer Base.
 
