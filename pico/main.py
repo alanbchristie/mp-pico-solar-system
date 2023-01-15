@@ -99,6 +99,10 @@ _ADVANCE_DAYS: int = 0
 # not interested in seeing all the planets orbit the Sun!
 # After all, it takes Neptune 165 years to complete its orbit!
 _ADVANCE_DAYS_MAX: int = 366
+# Minimum Days we're allowed to retard.
+# Zero means maximum 'retard' is now.
+# A value of -180 means a maximum retard of (approximately) 6 months (from now)
+_ADVANCE_DAYS_MIN: int = -366
 # The number of consecutive date advance/retard operation.
 # This is incremented in the 'button_press()' function
 # and cleared when the button's been released (from the run() method).
@@ -170,15 +174,15 @@ def button_pressed() -> bool:
             _ADVANCE_DAYS = _ADVANCE_DAYS_MAX
         return True
 
-    # If retarding, and not back to 'now'
+    # If retarding, and not back too far
     # then retard. In DEMO mode the advance/retard buttons are ignored.
     if not _DEMO and display.is_pressed(display.BUTTON_B)\
-            and _ADVANCE_DAYS > 0:
+            and _ADVANCE_DAYS > _ADVANCE_DAYS_MIN:
         _ADVANCE_DAYS -= get_speed()
-        if _ADVANCE_DAYS > 0:
+        if _ADVANCE_DAYS > _ADVANCE_DAYS_MIN:
             _CONSECUTIVE_CHANGE += 1
         else:
-            _ADVANCE_DAYS = 0
+            _ADVANCE_DAYS = _ADVANCE_DAYS_MIN
         return True
 
     if _DEMO:
@@ -230,7 +234,7 @@ def plot_date(pt: RealTimeClock) -> None:
     """Plots the solar system date.
     """
     assert pt
-    assert _ADVANCE_DAYS >= 0
+    assert _ADVANCE_DAYS >= _ADVANCE_DAYS_MIN
 
     # The explorer text() method takes 5 arguments: -
     # - String
@@ -256,7 +260,8 @@ def plot_date(pt: RealTimeClock) -> None:
             # To avoid wrapping at the space between the number and 'days'
             # we need to use a width that accommodates the max offset.
             # To be safe, regardless of the offset, use the whole display width.
-            display.text(f'+{_ADVANCE_DAYS} days', 0, 226, _DISPLAY_WIDTH, 2)
+            prefix = '+' if _ADVANCE_DAYS > 0 else ''
+            display.text(f'{prefix}{_ADVANCE_DAYS} days', 0, 226, _DISPLAY_WIDTH, 2)
 
 
 def plot_system(pt: RealTimeClock) -> None:
