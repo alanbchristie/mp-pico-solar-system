@@ -15,7 +15,7 @@ from ucollections import namedtuple  # type: ignore
 # A Real-Time Clock value
 # Year is full year, e.g. 2022
 RealTimeClock: namedtuple =\
-    namedtuple('RealTimeCLock',
+    namedtuple('RealTimeClock',
                ('year', 'month', 'dom', 'dow', 'h', 'm', 's'))
 
 
