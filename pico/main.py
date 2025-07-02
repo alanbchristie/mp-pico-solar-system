@@ -336,7 +336,7 @@ def plot_system(pt: RealTimeClock) -> None:
 
 
 def run() -> None:
-    """The main look, we remain here until the user
+    """The main loop, we remain here until the user
     hits the exit button.
     """
     global _CONSECUTIVE_CHANGE
@@ -350,6 +350,12 @@ def run() -> None:
     # to force the collection of the current time on the first pass.
     update_countdown: int = 0
 
+    # What time is it now?
+    now: RealTimeClock = _RTC.datetime()
+    now_seconds: float = time.mktime(
+        (now.year, now.month, now.dom, now.h, 0, 0, 0, 0, 0)
+    )
+
     while _RUN:
 
         # Update the current time?
@@ -357,12 +363,10 @@ def run() -> None:
         if update_countdown == 0:
             print('Getting new time of day...')
             # What time is it now?
-            now: RealTimeClock = _RTC.datetime()
-            now_seconds: float = time.mktime((now.year,
-                                              now.month,
-                                              now.dom,
-                                              now.h,
-                                              0, 0, 0, 0, 0))
+            now = _RTC.datetime()
+            now_seconds = time.mktime(
+                (now.year, now.month, now.dom, now.h, 0, 0, 0, 0, 0)
+            )
             print(f'Got {now}')
             rtc_changed = True
             # Reset the update countdown.
@@ -379,9 +383,15 @@ def run() -> None:
             gm_time: Tuple = time.gmtime(plot_seconds)
             # Convert to our RTC named-tuple.
             # We don't care about day-of-week, minute or second
-            rtc: RealTimeClock = RealTimeClock(gm_time[0], gm_time[1],
-                                               gm_time[2],
-                                               0, gm_time[3], 0, 0)
+            rtc = RealTimeClock(
+                gm_time[0],
+                gm_time[1],
+                gm_time[2],
+                0,
+                gm_time[3],
+                0,
+                0,
+            )
             # Display the solar system
             plot_system(rtc)
 
@@ -403,8 +413,5 @@ def run() -> None:
 
 # MAIN ------------------------------------------------------------------------
 
-if __name__ == '__main__':
-
-    # If running enter the 'main loop'...
-    if _RUN:
-        run()
+if __name__ == '__main__' and _RUN:
+    run()
